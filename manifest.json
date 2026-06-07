@@ -1,0 +1,16 @@
+{
+  "short_name": "Townhead Camp",
+  "name": "Townhead Camp Arbroath 2026",
+  "icons": [
+    {
+      "src": "No-fik-logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "index.html",
+  "background_color": "#F7E79B",
+  "theme_color": "#6E473B",
+  "display": "standalone",
+  "orientation": "portrait"
+}
