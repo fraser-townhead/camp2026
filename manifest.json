@@ -1,16 +1,19 @@
 {
   "short_name": "Townhead Camp",
   "name": "Townhead Camp Arbroath 2026",
+  "id": "/camp2026/",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7E79B",
+  "theme_color": "#6E473B",
+  "categories": ["education", "utilities"],
   "icons": [
     {
       "src": "No-fik-logo.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
-  ],
-  "start_url": "index.html",
-  "background_color": "#F7E79B",
-  "theme_color": "#6E473B",
-  "display": "standalone",
-  "orientation": "portrait"
+  ]
 }
