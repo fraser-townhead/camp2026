@@ -1,1 +1,130 @@
-<a href="qrscanner.html">QR scan</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Townhead Camp 2026</title>
+    <link rel="manifest" href="manifest.json">
+    
+    <style>
+        /* Matches your background color */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 20px 15px;
+            background-color: #F7E79B; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Top header image/logo spacing */
+        .logo-container {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            max-width: 320px;
+            width: 85%;
+        }
+        .logo-container img {
+            width: 100%;
+            height: auto;
+        }
+
+        /* Typography matching your theme styling */
+        h1 {
+            color: #1A1A1A;
+            font-size: 24px;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        h2 {
+            color: #1A1A1A;
+            font-size: 20px;
+            margin: 0 0 25px 0;
+            font-weight: normal;
+        }
+
+        /* Container to keep buttons nicely sized on desktop and mobile */
+        .button-list {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px; /* Spaces buttons out evenly */
+        }
+
+        /* Matches your exact brown button style */
+        .camp-btn {
+            background-color: #6E473B;
+            color: #FFFFFF;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+            padding: 14px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: transform 0.1s ease, background-color 0.2s;
+        }
+
+        /* Subtle click effect */
+        .camp-btn:active {
+            transform: scale(0.98);
+            background-color: #5C3A30;
+        }
+
+        /* Footer link style */
+        .footer-link {
+            margin-top: 35px;
+            color: #1A1A1A;
+            font-size: 16px;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo-container">
+        <img src="https://via.placeholder.com/320x180?text=Shipwrecked+Logo" alt="Shipwrecked Logo">
+    </div>
+
+    <h1>Townhead Camp &middot; Arbroath 2026</h1>
+    <h2>Choose from options below:</h2>
+
+    <div class="button-list">
+        
+        <a href="https://your-points-link-here.com" class="camp-btn">
+            <span>💯</span> Add Points
+        </a>
+
+        <a href="https://your-leaderboard-link-here.com" class="camp-btn">
+            <span>📊</span> Leaderboard (may be hidden later!)
+        </a>
+
+        <a href="scanner.html" class="camp-btn">
+            <span>📷</span> Scan QR
+        </a>
+
+        <a href="https://your-drive-link-here.com" class="camp-btn">
+            <span>📁</span> Google Drive folder
+        </a>
+
+        <a href="https://your-playlist-link-here.com" class="camp-btn">
+            <span>🎵</span> Songs Playlist
+        </a>
+
+    </div>
+
+    <div class="footer-link" onclick="alert('To install: Tap your browser share icon, then select Add to Home Screen!')">
+        📲 Add to Home Screen / Desktop
+    </div>
+
+</body>
+</html>
