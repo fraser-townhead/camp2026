@@ -3,98 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camp QR Scanner</title>
-    <link rel="manifest" href="manifest.json">
+    <title>Live QR Scanner</title>
     
-    <!-- Load the open-source QR Scanner Library directly from a secure CDN -->
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-
+    <!-- Tailwind CSS for layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- html5-qrcode library for live scanning -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    
     <style>
+        /* Custom Font Import */
+        @font-face {
+            font-family: 'SpongeBob Advance';
+            src: local('SpongeBob-Advance-Regular'),
+                 local('SpongeBob Advance Regular'),
+                 url('SpongeBob-Advance-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght=400;800;900&display=swap');
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f9;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            font-family: 'Nunito', sans-serif;
+            background-color: #F6E4A4;
+            color: #2c1a04;
         }
-        h1 { color: #333; margin-bottom: 5px; font-size: 24px; }
-        .subtitle { color: #666; margin-bottom: 20px; font-size: 14px; }
-        
-        /* Container for the live camera element */
-        #reader {
+
+        /* Outline font styled for headers & state messages */
+        .brand-font {
+            font-family: 'SpongeBob Advance', 'Impact', sans-serif;
+            color: white;
+            text-shadow: 
+                -3px -3px 0 #2c1a04,  
+                 3px -3px 0 #2c1a04,
+                -3px  3px 0 #2c1a04,
+                 3px  3px 0 #2c1a04,
+                 4px  4px 0 #2c1a04;
+            letter-spacing: 0.02em;
+            line-height: 1.1;
+        }
+
+        /* Classic thick borders and solid bottom-right shadow */
+        .cartoon-panel {
+            border: 5px solid #2c1a04;
+            box-shadow: 8px 8px 0px #2c1a04;
+        }
+
+        /* Main scanner status card */
+        #status {
+            transition: all 0.25s ease;
+            text-transform: uppercase;
+        }
+
+        /* Styling overrides for the injected HTML5-QRCode elements */
+        #qr-reader {
             width: 100%;
-            max-width: 450px;
-            background: white;
-            padding: 10px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: none !important; /* Overriding default inline styles */
+            border-radius: 1.5rem;
             overflow: hidden;
+            background-color: #000;
+        }
+
+        #qr-reader__scan_region {
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Hide the default stop/start buttons to use our own UI if desired, or let the library handle it cleanly */
+        #qr-reader__dashboard_section_csr {
+            display: none !important; 
+        }
+
+        #qr-reader video {
+            object-fit: cover !important;
+            border-radius: 1.5rem;
         }
         
-        /* Container for displaying the scan result */
-        #result-box {
-            margin-top: 20px;
-            padding: 15px;
-            width: 100%;
-            max-width: 450px;
-            background: #eef2ff;
-            border: 1px solid #c7d2fe;
-            border-radius: 8px;
-            display: none;
-            word-break: break-all;
+        /* Loading spinner animation */
+        .spinner {
+            animation: rotate 2s linear infinite;
         }
-        #result-link { font-weight: bold; color: #4f46e5; }
+        
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
-<body>
+<body class="min-h-screen w-screen flex flex-col items-center justify-center p-4">
 
-    <h1>Camp 2026 Scanner</h1>
-    <p class="subtitle">Position a QR code inside the camera box</p>
+    <!-- Container Card matching Team Reveal setup panel -->
+    <div class="bg-[#fffdf2] p-6 sm:p-10 rounded-[40px] cartoon-panel max-w-lg w-full text-center flex flex-col items-center gap-6">
+        
+        <!-- Header Section -->
+        <div class="flex flex-col items-center">
+            <!-- Camp Subtitle -->
+            <p class="text-[#2c1a04] font-black text-xs sm:text-sm uppercase tracking-widest opacity-70 mb-1">
+                Camp 2026 Check in
+            </p>
+            <h1 class="text-3xl sm:text-4xl brand-font uppercase">
+                Live Scanner
+            </h1>
+        </div>
 
-    <!-- The scanner renders inside this div -->
-    <div id="reader"></div>
+        <!-- Live Camera Feed Area -->
+        <div class="w-full bg-[#fcf9e8] p-4 rounded-3xl border-4 border-[#2c1a04] shadow-[4px_4px_0px_#2c1a04] relative">
+            
+            <!-- This is where the library injects the live video -->
+            <div id="qr-reader"></div>
 
-    <!-- This shows up only when a scan succeeds -->
-    <div id="result-box">
-        <strong>Scanned Result:</strong> <br>
-        <span id="result-text"></span>
+            <!-- Custom Setup State Overlay (visible while requesting permissions) -->
+            <div id="camera-setup" class="absolute inset-0 flex flex-col items-center justify-center bg-[#fcf9e8] rounded-[1.2rem] z-10 transition-opacity duration-300">
+                <div class="w-16 h-16 rounded-2xl bg-[#F6E4A4] border-4 border-[#2c1a04] shadow-[3px_3px_0px_#2c1a04] flex items-center justify-center mb-4 spinner">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#2c1a04" class="w-8 h-8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 47.859 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+                    </svg>
+                </div>
+                <button type="button" id="start-camera-btn" class="bg-white border-3 border-[#2c1a04] rounded-2xl px-4 py-3 font-black text-sm uppercase tracking-wide text-[#2c1a04] shadow-[4px_4px_0px_#2c1a04] hover:bg-[#fef9c3] transition-all">
+                    Start Camera
+                </button>
+            </div>
+            
+            <!-- Pause Overlay (Visible immediately after a scan) -->
+            <div id="scan-paused-overlay" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-[#2c1a04]/80 rounded-[1.2rem] z-20 backdrop-blur-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="#22c55e" class="w-16 h-16 mb-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+                <p class="brand-font text-2xl text-white">Captured!</p>
+            </div>
+        </div>
+
+        <!-- Status Box mimicking dynamic panel results -->
+        <div class="w-full">
+            <p class="text-[#2c1a04] text-xs font-black uppercase tracking-widest mb-2 opacity-50">
+                Scanner Feed Status
+            </p>
+            <div id="status" class="w-full py-4 px-6 bg-[#F6E4A4]/40 text-[#2c1a04] text-lg sm:text-xl font-black rounded-2xl border-4 border-[#2c1a04] shadow-[4px_4px_0px_#2c1a04]">
+                Camera Offline
+            </div>
+        </div>
+
+        <!-- Decorative Info Tag -->
+        <div class="text-[#2c1a04]/40 text-xs font-black uppercase tracking-widest">
+            Point camera at a QR Code
+        </div>
+
     </div>
 
     <script>
-        function onScanSuccess(decodedText, decodedResult) {
-            // Stop scanning once something is found to avoid duplicate alerts
-            html5QrcodeScanner.clear();
-            
-            const resultBox = document.getElementById('result-box');
-            const resultText = document.getElementById('result-text');
-            
-            resultBox.style.display = 'block';
-            
-            // Check if the scanned text looks like a web link
-            if (decodedText.startsWith('http://') || decodedText.startsWith('https://')) {
-                resultText.innerHTML = `<a id="result-link" href="${decodedText}" target="_blank">Open Link ➔</a><br><small>${decodedText}</small>`;
-                // Optional: Uncomment the next line to instantly jump to the URL automatically:
-                // window.location.href = decodedText;
-            } else {
-                resultText.textContent = decodedText;
-            }
-        }
+        // Your live active Google Web App URL:
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxGi9L8yXZWjZ1WdzkYTjtQVcm9zxt8Ezbt_uUqRj4JDwjnf9nvHt499DbXXaTsyhb_/exec"; 
 
-        function onScanFailure(error) {
-            // We ignore errors during scanning because it throws errors constantly 
-            // when searching frames for a QR code.
-        }
-
-        // Initialize the scanner engine
-        let html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", 
-            { fps: 10, qrbox: {width: 250, height: 250} },
-            /* verbose= */ false
-        );
+        const statusEl = document.getElementById('status');
+        const cameraSetupOverlay = document.getElementById('camera-setup');
+        const startCameraBtn = document.getElementById('start-camera-btn');
+        const scanPausedOverlay = document.getElementById('scan-paused-overlay');
         
-        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        let html5QrCode;
+        let isScanning = false;
+
+        // Initialize the scanner on the div
+        function initScanner() {
+            html5QrCode = new Html5Qrcode("qr-reader");
+        }
+
+        // Handle the start button click
+        startCameraBtn.addEventListener('click', () => {
+            if (!html5QrCode) initScanner();
+            
+            startCameraBtn.innerText = "Requesting Access...";
+            startCameraBtn.classList.add('opacity-50', 'pointer-events-none');
+            
+            // Configuration for the live feed
+            const config = { 
+                fps: 10, 
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0 // Force square-ish aspect ratio to fit UI
+            };
+
+            // Start scanning, preferring the back camera
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
+                .then(() => {
+                    isScanning = true;
+                    // Hide the setup overlay once the camera starts
+                    cameraSetupOverlay.style.opacity = '0';
+                    setTimeout(() => cameraSetupOverlay.classList.add('hidden'), 300);
+                    
+                    updateStatus("Scanning for QR...", "", "", "");
+                })
+                .catch((err) => {
+                    console.error("Camera start failed:", err);
+                    updateStatus("Camera access denied.", "#ef4444", "#ffffff", "-2px -2px 0 #2c1a04, 2px -2px 0 #2c1a04, -2px 2px 0 #2c1a04, 2px 2px 0 #2c1a04");
+                    startCameraBtn.innerText = "Try Again";
+                    startCameraBtn.classList.remove('opacity-50', 'pointer-events-none');
+                });
+        });
+
+        // Callback when a QR code is successfully decoded
+        function onScanSuccess(decodedText, decodedResult) {
+            // Prevent multiple triggers if already processing
+            if (!isScanning) return; 
+            isScanning = false;
+
+            console.log(`Scan result: ${decodedText}`);
+
+            // 1. Pause the scanner immediately to prevent duplicate scans
+            html5QrCode.pause();
+            
+            // 2. Show the visual capture overlay on the camera feed
+            scanPausedOverlay.classList.remove('hidden');
+
+            // 3. Update the bottom status panel
+            updateStatus("Sending code: " + decodedText + "...", "#eab308", "", "");
+
+            // 4. Send data to Google Sheets via Web App
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ qrCode: decodedText })
+            })
+            .then(() => {
+                updateStatus("Successfully Logged!", "#22c55e", "#ffffff", "-2px -2px 0 #2c1a04, 2px -2px 0 #2c1a04, -2px 2px 0 #2c1a04, 2px 2px 0 #2c1a04");
+                resumeScanningAfterDelay();
+            })
+            .catch(err => {
+                console.error("Fetch error:", err);
+                updateStatus("Error sending data. Try again.", "#ef4444", "#ffffff", "-2px -2px 0 #2c1a04, 2px -2px 0 #2c1a04, -2px 2px 0 #2c1a04, 2px 2px 0 #2c1a04");
+                resumeScanningAfterDelay();
+            });
+        }
+
+        // Callback for scan failures (usually means no QR code in frame yet)
+        function onScanFailure(error) {
+            // We ignore this generally, as it fires constantly while looking for a code.
+            // You could use this to show a "Move closer" hint if desired.
+        }
+
+        // Helper to resume the live feed after processing
+        function resumeScanningAfterDelay() {
+            setTimeout(() => {
+                // Hide capture overlay
+                scanPausedOverlay.classList.add('hidden');
+                
+                // Reset status panel
+                updateStatus("Scanning for QR...", "", "", "");
+                
+                // Resume the camera feed logic
+                html5QrCode.resume();
+                isScanning = true;
+            }, 3500); // Wait 3.5 seconds before allowing the next scan
+        }
+
+        // Helper to update the styling of the status block
+        function updateStatus(text, bgColor, textColor, shadow) {
+            statusEl.innerText = text;
+            statusEl.style.backgroundColor = bgColor;
+            statusEl.style.color = textColor;
+            statusEl.style.textShadow = shadow;
+        }
+
+        // Initialize scanner object on page load (doesn't start camera until button is clicked)
+        window.addEventListener('load', initScanner);
+
     </script>
 </body>
 </html>
