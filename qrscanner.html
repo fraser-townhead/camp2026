@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camp QR Scanner</title>
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Load the open-source QR Scanner Library directly from a secure CDN -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { color: #333; margin-bottom: 5px; font-size: 24px; }
+        .subtitle { color: #666; margin-bottom: 20px; font-size: 14px; }
+        
+        /* Container for the live camera element */
+        #reader {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        /* Container for displaying the scan result */
+        #result-box {
+            margin-top: 20px;
+            padding: 15px;
+            width: 100%;
+            max-width: 450px;
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+            display: none;
+            word-break: break-all;
+        }
+        #result-link { font-weight: bold; color: #4f46e5; }
+    </style>
+</head>
+<body>
+
+    <h1>Camp 2026 Scanner</h1>
+    <p class="subtitle">Position a QR code inside the camera box</p>
+
+    <!-- The scanner renders inside this div -->
+    <div id="reader"></div>
+
+    <!-- This shows up only when a scan succeeds -->
+    <div id="result-box">
+        <strong>Scanned Result:</strong> <br>
+        <span id="result-text"></span>
+    </div>
+
+    <script>
+        function onScanSuccess(decodedText, decodedResult) {
+            // Stop scanning once something is found to avoid duplicate alerts
+            html5QrcodeScanner.clear();
+            
+            const resultBox = document.getElementById('result-box');
+            const resultText = document.getElementById('result-text');
+            
+            resultBox.style.display = 'block';
+            
+            // Check if the scanned text looks like a web link
+            if (decodedText.startsWith('http://') || decodedText.startsWith('https://')) {
+                resultText.innerHTML = `<a id="result-link" href="${decodedText}" target="_blank">Open Link ➔</a><br><small>${decodedText}</small>`;
+                // Optional: Uncomment the next line to instantly jump to the URL automatically:
+                // window.location.href = decodedText;
+            } else {
+                resultText.textContent = decodedText;
+            }
+        }
+
+        function onScanFailure(error) {
+            // We ignore errors during scanning because it throws errors constantly 
+            // when searching frames for a QR code.
+        }
+
+        // Initialize the scanner engine
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", 
+            { fps: 10, qrbox: {width: 250, height: 250} },
+            /* verbose= */ false
+        );
+        
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    </script>
+</body>
+</html>
