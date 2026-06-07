@@ -10,7 +10,7 @@
   "categories": ["education", "utilities"],
   "icons": [
     {
-      "src": "No-fik-logo.png",
+      "src": "app_icon_square.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
